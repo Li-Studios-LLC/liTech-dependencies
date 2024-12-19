@@ -23,6 +23,30 @@
  * # CategoryEvents
  *
  * Event queue management.
+ *
+ * It's extremely common--often required--that an app deal with SDL's event
+ * queue. Almost all useful information about interactions with the real world
+ * flow through here: the user interacting with the computer and app, hardware
+ * coming and going, the system changing in some way, etc.
+ *
+ * An app generally takes a moment, perhaps at the start of a new frame, to
+ * examine any events that have occured since the last time and process or
+ * ignore them. This is generally done by calling SDL_PollEvent() in a loop
+ * until it returns false (or, if using the main callbacks, events are
+ * provided one at a time in calls to SDL_AppEvent() before the next call to
+ * SDL_AppIterate(); in this scenario, the app does not call SDL_PollEvent()
+ * at all).
+ *
+ * There is other forms of control, too: SDL_PeepEvents() has more
+ * functionality at the cost of more complexity, and SDL_WaitEvents() can
+ * block the process until something interesting happens, which might be
+ * beneficial for certain types of programs on low-power hardware. One may
+ * also call SDL_AddEventWatch() to set a callback when new events arrive.
+ *
+ * The app is free to generate their own events, too: SDL_PushEvent allows the
+ * app to put events onto the queue for later retrieval; SDL_RegisterEvents
+ * can guarantee that these events have a type that isn't in use by other
+ * parts of the system.
  */
 
 #ifndef SDL_events_h_
@@ -158,6 +182,9 @@ typedef enum SDL_EventType
     SDL_EVENT_MOUSE_WHEEL,             /**< Mouse wheel motion */
     SDL_EVENT_MOUSE_ADDED,             /**< A new mouse has been inserted into the system */
     SDL_EVENT_MOUSE_REMOVED,           /**< A mouse has been removed */
+    SDL_EVENT_MOUSE_RAW_MOTION,        /**< Mouse moved (raw motion deltas) */
+    SDL_EVENT_MOUSE_RAW_BUTTON,        /**< Mouse click (raw button delta) */
+    SDL_EVENT_MOUSE_RAW_SCROLL,         /**< Mouse wheel (raw scroll deltas) */
 
     /* Joystick events */
     SDL_EVENT_JOYSTICK_AXIS_MOTION  = 0x600, /**< Joystick axis motion */
@@ -431,6 +458,23 @@ typedef struct SDL_MouseMotionEvent
 } SDL_MouseMotionEvent;
 
 /**
+ * Mouse raw motion and wheel event structure (event.maxis.*)
+ *
+ * \since This struct is available since SDL 3.0.0.
+ */
+typedef struct SDL_MouseRawAxisEvent
+{
+    SDL_EventType type; /**< SDL_EVENT_MOUSE_RAW_MOTION or SDL_EVENT_MOUSE_RAW_SCROLL */
+    Uint32 reserved;
+    Uint64 timestamp;   /**< In nanoseconds, populated using SDL_GetTicksNS() */
+    SDL_MouseID which;  /**< The mouse instance id, SDL_TOUCH_MOUSEID, or SDL_PEN_MOUSEID */
+    int dx;             /**< The axis delta value in the X direction */
+    int dy;             /**< The axis delta value in the Y direction */
+    float ux;           /**< The denominator unit in the X direction */
+    float uy;           /**< The denominator unit in the Y direction */
+} SDL_MouseRawAxisEvent;
+
+/**
  * Mouse button event structure (event.button.*)
  *
  * \since This struct is available since SDL 3.1.3.
@@ -449,6 +493,21 @@ typedef struct SDL_MouseButtonEvent
     float x;            /**< X coordinate, relative to window */
     float y;            /**< Y coordinate, relative to window */
 } SDL_MouseButtonEvent;
+
+/**
+ * Mouse raw button event structure (event.mbutton.*)
+ *
+ * \since This struct is available since SDL 3.0.0.
+ */
+typedef struct SDL_MouseRawButtonEvent
+{
+    SDL_EventType type; /**< SDL_EVENT_MOUSE_RAW_BUTTON */
+    Uint32 reserved;
+    Uint64 timestamp;   /**< In nanoseconds, populated using SDL_GetTicksNS() */
+    SDL_MouseID which;  /**< The mouse instance id, SDL_TOUCH_MOUSEID, or SDL_PEN_MOUSEID */
+    Uint8 button;       /**< The mouse button index */
+    Uint8 state;        /**< SDL_PRESSED or SDL_RELEASED */
+} SDL_MouseRawButtonEvent;
 
 /**
  * Mouse wheel event structure (event.wheel.*)
@@ -773,7 +832,7 @@ typedef struct SDL_PenProximityEvent
     SDL_EventType type; /**< SDL_EVENT_PEN_PROXIMITY_IN or SDL_EVENT_PEN_PROXIMITY_OUT */
     Uint32 reserved;
     Uint64 timestamp;   /**< In nanoseconds, populated using SDL_GetTicksNS() */
-    SDL_WindowID windowID; /**< The window with mouse focus, if any */
+    SDL_WindowID windowID; /**< The window with pen focus, if any */
     SDL_PenID which;        /**< The pen instance id */
 } SDL_PenProximityEvent;
 
@@ -793,7 +852,7 @@ typedef struct SDL_PenMotionEvent
     SDL_EventType type; /**< SDL_EVENT_PEN_MOTION */
     Uint32 reserved;
     Uint64 timestamp;   /**< In nanoseconds, populated using SDL_GetTicksNS() */
-    SDL_WindowID windowID; /**< The window with mouse focus, if any */
+    SDL_WindowID windowID; /**< The window with pen focus, if any */
     SDL_PenID which;        /**< The pen instance id */
     SDL_PenInputFlags pen_state;   /**< Complete pen input state at time of event */
     float x;                /**< X coordinate, relative to window */
@@ -973,6 +1032,8 @@ typedef union SDL_Event
     SDL_MouseMotionEvent motion;            /**< Mouse motion event data */
     SDL_MouseButtonEvent button;            /**< Mouse button event data */
     SDL_MouseWheelEvent wheel;              /**< Mouse wheel event data */
+    SDL_MouseRawAxisEvent maxis;            /**< Mouse raw axis event data (motion or wheel deltas) */
+    SDL_MouseRawButtonEvent mbutton;        /**< Mouse raw button event data */
     SDL_JoyDeviceEvent jdevice;             /**< Joystick device change event data */
     SDL_JoyAxisEvent jaxis;                 /**< Joystick axis event data */
     SDL_JoyBallEvent jball;                 /**< Joystick ball event data */
