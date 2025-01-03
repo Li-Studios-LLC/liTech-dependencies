@@ -1,9 +1,6 @@
 [submodule "Inc/stb"]
 	path = Inc/stb
 	url = https://github.com/nothings/stb.git
-[submodule "Inc/glm"]
-	path = Inc/glm
-	url = https://github.com/g-truc/glm.git
 [submodule "PremakeModules/emscripten"]
 	path = PremakeModules/emscripten
 	url = https://github.com/tritao/premake-emscripten.git
