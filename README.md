@@ -2,7 +2,6 @@
 
 ## Dependencies
 - SDL3
-- fmt
 - DirectXMath
 - stb headers
 
