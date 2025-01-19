@@ -730,6 +730,7 @@ extern "C" {
  * - "#document": the javascript document object
  * - "#screen": the javascript window.screen object
  * - "#canvas": the WebGL canvas element
+ * - "#none": Don't bind anything at all
  * - any other string without a leading # sign applies to the element on the
  *   page with that ID.
  *
@@ -2534,7 +2535,7 @@ extern "C" {
  * - "1": Relative mouse motion will be scaled using the system mouse
  *   acceleration curve.
  *
- * If SDL_HINT_MOUSE_RELATIVE_SPEED_SCALE is set, that will override the
+ * If SDL_HINT_MOUSE_RELATIVE_SPEED_SCALE is set, that will be applied after
  * system speed scale.
  *
  * This hint can be set anytime.
@@ -2635,11 +2636,24 @@ extern "C" {
  * Specify the OpenGL library to load.
  *
  * This hint should be set before creating an OpenGL window or creating an
- * OpenGL context.
+ * OpenGL context. If this hint isn't set, SDL will choose a reasonable
+ * default.
  *
  * \since This hint is available since SDL 3.1.3.
  */
 #define SDL_HINT_OPENGL_LIBRARY "SDL_OPENGL_LIBRARY"
+
+/**
+ * Specify the EGL library to load.
+ *
+ * This hint should be set before creating an OpenGL window or creating an
+ * OpenGL context. This hint is only considered if SDL is using EGL to manage
+ * OpenGL contexts. If this hint isn't set, SDL will choose a reasonable
+ * default.
+ *
+ * \since This hint is available since SDL 3.2.0.
+ */
+#define SDL_HINT_EGL_LIBRARY "SDL_EGL_LIBRARY"
 
 /**
  * A variable controlling what driver to use for OpenGL ES contexts.
@@ -3316,6 +3330,27 @@ extern "C" {
  * \since This hint is available since SDL 3.1.3.
  */
 #define SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES "SDL_VIDEO_MAC_FULLSCREEN_SPACES"
+
+/**
+ * A variable that specifies the menu visibility when a window is fullscreen
+ * in Spaces on macOS.
+ *
+ * The variable can be set to the following values:
+ *
+ * - "0": The menu will be hidden when the window is in a fullscreen space,
+ *   and not accessible by moving the mouse to the top of the screen.
+ * - "1": The menu will be accessible when the window is in a fullscreen
+ *   space.
+ * - "auto": The menu will be hidden if fullscreen mode was toggled on
+ *   programmatically via `SDL_SetWindowFullscreen()`, and accessible if
+ *   fullscreen was entered via the "fullscreen" button on the window title
+ *   bar. (default)
+ *
+ * This hint can be set anytime.
+ *
+ * \since This hint is available since SDL 3.1.9.
+ */
+#define SDL_HINT_VIDEO_MAC_FULLSCREEN_MENU_VISIBILITY "SDL_VIDEO_MAC_FULLSCREEN_MENU_VISIBILITY"
 
 /**
  * A variable controlling whether fullscreen windows are minimized when they
@@ -4150,6 +4185,36 @@ extern "C" {
  * \since This hint is available since SDL 3.1.3.
  */
 #define SDL_HINT_ASSERT "SDL_ASSERT"
+
+/**
+ * A variable controlling whether pen events should generate synthetic mouse
+ * events.
+ *
+ * The variable can be set to the following values:
+ *
+ * - "0": Pen events will not generate mouse events.
+ * - "1": Pen events will generate mouse events. (default)
+ *
+ * This hint can be set anytime.
+ *
+ * \since This hint is available since SDL 3.2.0.
+ */
+#define SDL_HINT_PEN_MOUSE_EVENTS "SDL_PEN_MOUSE_EVENTS"
+
+/**
+ * A variable controlling whether pen events should generate synthetic touch
+ * events.
+ *
+ * The variable can be set to the following values:
+ *
+ * - "0": Pen events will not generate touch events.
+ * - "1": Pen events will generate touch events. (default)
+ *
+ * This hint can be set anytime.
+ *
+ * \since This hint is available since SDL 3.2.0.
+ */
+#define SDL_HINT_PEN_TOUCH_EVENTS "SDL_PEN_TOUCH_EVENTS"
 
 
 /**
