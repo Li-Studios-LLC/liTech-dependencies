@@ -2,7 +2,7 @@
 
 ## Dependencies
 - SDL3
-- DirectXMath
 - stb headers
+- tinyxml2
 
 [Main Repo](https://github.com/Li-Studios-LLC/liTech)
